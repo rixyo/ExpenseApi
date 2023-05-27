@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model Home {
+  id        String     @id @default(uuid())
+  listed_date DateTime @default(now())
+  name      String
+  address   String
+  city      String
+  state     String
+  zip       String
+  propertyType PropertyType
+  beds      Int
+  baths     Int
+  sqft      Int
+  price     Float
+  status   Status 
+  description String
+  images    Image[]
+  messages  Message[]
+  realtorId String
+  realtor   User     @relation(fields: [realtorId], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+}
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  phone     String
+  password  String
+  role      Role    @default(BUYER)
+  homes     Home[]
+  buyerMessages Message[] @relation("BuyerMessages")
+  realtorMessages Message[] @relation("RealtorMessages")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+  homeId    String
+  home      Home     @relation(fields: [homeId], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+model Message {
+  id        Int      @id @default(autoincrement())
+  message   String
+  homeId    String
+  home      Home     @relation(fields: [homeId], references: [id])
+  buyerId   String
+  buyer     User     @relation("BuyerMessages",fields: [buyerId], references: [id])
+  realtorId String
+  realtor   User     @relation("RealtorMessages",fields: [realtorId], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+enum Role {
+  BUYER
+  REALTOR
+  ADMIN
+}
+enum PropertyType {
+  RESIDENTIAL
+  SINGLE_FAMILY
+  HOUSE
+  CONDO
+  TOWNHOUSE
+  MULTI_FAMILY
+  LAND
+  MOBILE
+  OTHER
+}
+enum Status {
+  SOLD
+  RENTED
+  ACTIVE
+
+}
+
+
