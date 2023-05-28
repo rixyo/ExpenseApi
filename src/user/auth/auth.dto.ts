@@ -18,7 +18,6 @@ export class SignupDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(8)
-  @MaxLength(20)
   password: string;
   @IsEmail()
   @IsNotEmpty()
@@ -29,4 +28,12 @@ export class SignupDto {
     message: 'phone number must be in the format +xxx(xxx)xxxx-xxxx',
   })
   phone: string;
+}
+export class LoginDto {
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 }
