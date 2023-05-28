@@ -5,8 +5,11 @@ import {
   IsEmail,
   Matches,
   IsNotEmpty,
+  IsEnum,
+  IsOptional,
 } from 'class-validator';
 import {} from 'class-transformer';
+import { Role } from '@prisma/client';
 
 export class SignupDto {
   id: string;
@@ -28,6 +31,9 @@ export class SignupDto {
     message: 'phone number must be in the format +xxx(xxx)xxxx-xxxx',
   })
   phone: string;
+  @IsString()
+  @IsOptional()
+  productKey?: string;
 }
 export class LoginDto {
   @IsString()
@@ -36,4 +42,11 @@ export class LoginDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+}
+export class GenerateProductDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+  @IsEnum(Role)
+  userType: Role;
 }
