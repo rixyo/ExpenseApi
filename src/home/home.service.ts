@@ -13,7 +13,7 @@ interface Filters {
   baths?: number;
   propertyType?: PropertyType;
 }
-interface CreateHomeDto {
+interface CreateHomeParams {
   price: number;
   state: string;
   images: { url: string }[];
@@ -23,7 +23,17 @@ interface CreateHomeDto {
   sqft: number;
   beds: number;
   baths: number;
-  realtorId: string;
+}
+
+interface UpdatedHomeParams {
+  price?: number;
+  state?: string;
+  zip?: string;
+  city?: string;
+  propertyType?: PropertyType;
+  sqft?: number;
+  beds?: number;
+  baths?: number;
 }
 
 @Injectable()
@@ -50,6 +60,9 @@ export class HomeService {
           take: 1,
         },
       },
+      orderBy: {
+        listed_date: 'desc',
+      },
     });
     if (!homes) {
       throw NotFoundException;
@@ -64,24 +77,32 @@ export class HomeService {
     const home = await this.prisma.home.findUnique({
       where: { id },
       include: {
-        images: true,
-        messages: true,
+        images: {
+          select: {
+            url: true,
+          },
+        },
       },
     });
+    if (!home) {
+      throw NotFoundException;
+    }
     return new HomeResponseDto(home);
   }
-  async createHome({
-    price,
-    baths,
-    beds,
-    city,
-    propertyType,
-    realtorId,
-    sqft,
-    state,
-    zip,
-    images,
-  }: CreateHomeDto): Promise<HomeResponseDto> {
+  async createHome(
+    {
+      price,
+      baths,
+      beds,
+      city,
+      propertyType,
+      sqft,
+      state,
+      zip,
+      images,
+    }: CreateHomeParams,
+    realtorId: string,
+  ): Promise<HomeResponseDto> {
     const home = await this.prisma.home.create({
       data: {
         id: uuid(),
@@ -103,5 +124,124 @@ export class HomeService {
     });
 
     return new HomeResponseDto(home);
+  }
+  async updateHome(
+    id: string,
+    {
+      price,
+      baths,
+      beds,
+      city,
+      propertyType,
+      sqft,
+      state,
+      zip,
+    }: UpdatedHomeParams,
+  ): Promise<HomeResponseDto> {
+    const homeExists = await this.prisma.home.findUnique({ where: { id } });
+    if (!homeExists) throw new NotFoundException('Home not found');
+    const home = await this.prisma.home.update({
+      where: { id: homeExists.id },
+      data: {
+        price,
+        baths,
+        beds,
+        city,
+        propertyType,
+        sqft,
+        state,
+        zip,
+      },
+    });
+    return new HomeResponseDto(home);
+  }
+  async deleteHome(id: string): Promise<string> {
+    const homeExists = await this.prisma.home.findUnique({ where: { id } });
+    if (!homeExists) throw new NotFoundException('Home not found');
+    await this.prisma.home.delete({ where: { id } });
+    return 'deleted successfully';
+  }
+  async getRealtorByHomeId(id: string) {
+    const home = await this.prisma.home.findUnique({
+      where: { id },
+      select: {
+        realtor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    });
+    if (!home) {
+      throw NotFoundException;
+    }
+    return home;
+  }
+  async inquire(
+    message: string,
+    realtorId: string,
+    homeId: string,
+    buyerId: string,
+  ) {
+    return this.prisma.message.create({
+      data: {
+        id: uuid(),
+        homeId: homeId,
+        message: message,
+        buyerId: buyerId,
+        realtorId: realtorId,
+      },
+    });
+  }
+  async getMessages(homeId: string) {
+    return this.prisma.message.findMany({
+      where: {
+        homeId: homeId,
+      },
+      select: {
+        message: true,
+        buyer: {
+          select: {
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        home: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+  }
+  async searchHomes(query: string) {
+    return this.prisma.home.findMany({
+      where: {
+        OR: [
+          {
+            state: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            city: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            zip: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
   }
 }

@@ -33,7 +33,7 @@ model User {
   name      String
   phone     String
   password  String
-  role      Role    
+  role      UserRole    
   homes     Home[]
   buyerMessages Message[] @relation("BuyerMessages")
   realtorMessages Message[] @relation("RealtorMessages")
@@ -44,15 +44,15 @@ model Image {
   id        Int      @id @default(autoincrement())
   url       String
   homeId    String
-  home      Home     @relation(fields: [homeId], references: [id])
+  home      Home     @relation(fields: [homeId], references: [id],onDelete: Cascade)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 model Message {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   message   String
   homeId    String
-  home      Home     @relation(fields: [homeId], references: [id])
+  home      Home     @relation(fields: [homeId], references: [id],onDelete: Cascade)
   buyerId   String
   buyer     User     @relation("BuyerMessages",fields: [buyerId], references: [id])
   realtorId String
@@ -60,7 +60,7 @@ model Message {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
-enum Role {
+enum UserRole {
   BUYER
   REALTOR
   ADMIN

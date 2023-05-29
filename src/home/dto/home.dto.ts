@@ -5,6 +5,8 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsOptional,
+  IsPositive,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -40,6 +42,7 @@ export class HomeResponseDto {
 export class CreateHomeDto {
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   price: number;
   @IsString()
   @IsNotEmpty()
@@ -58,19 +61,60 @@ export class CreateHomeDto {
   propertyType: PropertyType;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   sqft: number;
   @IsInt()
+  @IsPositive()
   @IsNotEmpty()
   beds: number;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   baths: number;
-  @IsString()
-  @IsNotEmpty()
-  realtorId: string;
 }
 class Image {
   @IsString()
   @IsNotEmpty()
   url: string;
+}
+export class UpdatedHomeDto {
+  @IsOptional()
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  price?: number;
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty()
+  state?: string;
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  zip?: string;
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  city?: string;
+  @IsEnum(PropertyType)
+  propertyType?: PropertyType;
+  @IsInt()
+  @IsNotEmpty()
+  @IsPositive()
+  @IsOptional()
+  sqft?: number;
+  @IsInt()
+  @IsPositive()
+  @IsNotEmpty()
+  @IsOptional()
+  beds?: number;
+  @IsInt()
+  @IsOptional()
+  @IsNotEmpty()
+  @IsPositive()
+  baths?: number;
+}
+export class InqueryDto {
+  @IsString()
+  @IsNotEmpty()
+  message: string;
 }

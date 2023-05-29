@@ -9,7 +9,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import {} from 'class-transformer';
-import { Role } from '@prisma/client';
+import { UserRole } from '@prisma/client';
 
 export class SignupDto {
   id: string;
@@ -47,6 +47,6 @@ export class GenerateProductDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
-  @IsEnum(Role)
-  userType: Role;
+  @IsEnum(UserRole)
+  userType: UserRole;
 }

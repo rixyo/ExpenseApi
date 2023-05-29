@@ -3,10 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { Role } from '@prisma/client';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('dotenv').config();
-
+import { UserRole } from '@prisma/client';
 interface SignupParams {
   id: string;
   email: string;
@@ -23,7 +20,10 @@ interface LoginParams {
 @Injectable()
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
-  async signup({ email, password, name, phone }: SignupParams, userType: Role) {
+  async signup(
+    { email, password, name, phone }: SignupParams,
+    userType: UserRole,
+  ) {
     const ExistingUser = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -61,8 +61,11 @@ export class AuthService {
       expiresIn: '1d',
     });
   }
-  genarateProductKey(email: string, userType: Role) {
+  genarateProductKey(email: string, userType: UserRole) {
     const token = `${email}-${userType}-${process.env.PRODUCT_KEY_SECRET}`;
     return bcrypt.hash(token, 10);
+  }
+  async getCurrentUser(id: string) {
+    return this.prisma.user.findUnique({ where: { id } });
   }
 }

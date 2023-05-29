@@ -1,5 +1,3 @@
-//user controller is a class that responsible for authenticating users
-///9:15 PM 27/05/2023
 import {
   Controller,
   Post,
@@ -7,23 +5,22 @@ import {
   Param,
   ParseEnumPipe,
   UnauthorizedException,
+  Get,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
-import { GenerateProductDto, LoginDto, SignupDto } from './auth.dto';
+import { UserRole } from '@prisma/client';
+import { GenerateProductDto, LoginDto, SignupDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import * as bcrypt from 'bcrypt';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('dotenv').config();
-
+import { User, userType } from '../decorators/user.decorator';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post('signup/:userType')
   async signup(
     @Body() body: SignupDto,
-    @Param('userType', new ParseEnumPipe(Role)) userType: Role,
+    @Param('userType', new ParseEnumPipe(UserRole)) userType: UserRole,
   ) {
-    if (userType !== Role.BUYER) {
+    if (userType !== UserRole.BUYER) {
       if (!body.productKey) {
         throw new UnauthorizedException('product key is required');
       }
@@ -45,5 +42,9 @@ export class AuthController {
   @Post('product-key')
   genarateProductKey(@Body() body: GenerateProductDto) {
     return this.authService.genarateProductKey(body.email, body.userType);
+  }
+  @Get('me')
+  me(@User() user: userType) {
+    return this.authService.getCurrentUser(user?.id);
   }
 }
