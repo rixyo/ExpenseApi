@@ -18,6 +18,7 @@ async function main() {
     origin: 'http://localhost:3000',
     credentials: true,
   });
+
   await app.listen(5000);
 }
 main();

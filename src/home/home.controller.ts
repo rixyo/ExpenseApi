@@ -49,6 +49,7 @@ export class HomeController {
     };
     return await this.homeService.getHomes(filters);
   }
+
   @Get(':id')
   async getHomeById(
     @Param('id', ParseUUIDPipe) id: string,
@@ -102,15 +103,8 @@ export class HomeController {
   }
   @Roles(UserRole.REALTOR)
   @Get(':id/messages')
-  async getMessages(
-    @Param('id', ParseUUIDPipe) homeId: string,
-    @User() user: userType,
-  ) {
-    const realtor = await this.homeService.getRealtorByHomeId(homeId);
-    if (realtor.realtor.id !== user.id) {
-      throw new UnauthorizedException();
-    }
-    return await this.homeService.getMessages(homeId);
+  async getMessages(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.homeService.getMessages(id);
   }
   @Get('search/:query')
   async searchHomes(@Param('query') query: string) {

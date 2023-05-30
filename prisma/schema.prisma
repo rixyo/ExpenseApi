@@ -12,6 +12,7 @@ model Home {
   id        String     @id @default(uuid())
   listed_date DateTime @default(now())
   city      String
+  address   String
   state     String
   zip       String
   propertyType PropertyType
@@ -33,7 +34,7 @@ model User {
   name      String
   phone     String
   password  String
-  role      UserRole    
+  role      UserRole 
   homes     Home[]
   buyerMessages Message[] @relation("BuyerMessages")
   realtorMessages Message[] @relation("RealtorMessages")

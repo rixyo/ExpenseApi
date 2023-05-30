@@ -15,6 +15,7 @@ interface Filters {
 }
 interface CreateHomeParams {
   price: number;
+  address: string;
   state: string;
   images: { url: string }[];
   zip: string;
@@ -30,6 +31,7 @@ interface UpdatedHomeParams {
   state?: string;
   zip?: string;
   city?: string;
+  address?: string;
   propertyType?: PropertyType;
   sqft?: number;
   beds?: number;
@@ -53,6 +55,7 @@ export class HomeService {
         propertyType: true,
         sqft: true,
         zip: true,
+        address: true,
         images: {
           select: {
             url: true,
@@ -100,6 +103,7 @@ export class HomeService {
       state,
       zip,
       images,
+      address,
     }: CreateHomeParams,
     realtorId: string,
   ): Promise<HomeResponseDto> {
@@ -115,6 +119,7 @@ export class HomeService {
         sqft,
         state,
         zip,
+        address,
       },
     });
 
@@ -196,10 +201,10 @@ export class HomeService {
       },
     });
   }
-  async getMessages(homeId: string) {
+  async getMessages(realtorId: string) {
     return this.prisma.message.findMany({
       where: {
-        homeId: homeId,
+        realtorId: realtorId,
       },
       select: {
         message: true,
@@ -215,6 +220,9 @@ export class HomeService {
             id: true,
           },
         },
+      },
+      orderBy: {
+        created_at: 'desc',
       },
     });
   }

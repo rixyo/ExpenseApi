@@ -31,7 +31,6 @@ export class AuthService {
       throw new ConflictException('invalid credentails');
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await this.prisma.user.create({
       data: {
         id: uuid(),
@@ -43,7 +42,7 @@ export class AuthService {
       },
     });
 
-    return this.generateToken(user.id, user.name);
+    return this.generateToken(user.id, user.name, user.role);
   }
   async login({ email, password }: LoginParams) {
     const user = await this.prisma.user.findUnique({ where: { email } });
@@ -54,11 +53,11 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new HttpException('Invalid credentails', 400);
     }
-    return this.generateToken(user.id, user.name);
+    return this.generateToken(user.id, user.name, user.role);
   }
-  private generateToken(id: string, name: string) {
-    return jwt.sign({ name, id }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
+  private generateToken(id: string, name: string, role: UserRole) {
+    return jwt.sign({ name, id, role }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
     });
   }
   genarateProductKey(email: string, userType: UserRole) {

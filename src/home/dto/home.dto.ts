@@ -28,6 +28,7 @@ export class HomeResponseDto {
   sqft: number;
   beds: number;
   baths: number;
+  address: string;
   @Exclude()
   realtorId: string;
   @Exclude()
@@ -47,6 +48,9 @@ export class CreateHomeDto {
   @IsString()
   @IsNotEmpty()
   state: string;
+  @IsString()
+  @IsNotEmpty()
+  address: string;
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Image)
@@ -80,36 +84,30 @@ class Image {
 export class UpdatedHomeDto {
   @IsOptional()
   @IsInt()
-  @IsNotEmpty()
   @IsPositive()
   price?: number;
   @IsString()
   @IsOptional()
-  @IsNotEmpty()
   state?: string;
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
   zip?: string;
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
   city?: string;
+  @IsOptional()
   @IsEnum(PropertyType)
   propertyType?: PropertyType;
   @IsInt()
-  @IsNotEmpty()
   @IsPositive()
   @IsOptional()
   sqft?: number;
   @IsInt()
   @IsPositive()
-  @IsNotEmpty()
   @IsOptional()
   beds?: number;
   @IsInt()
   @IsOptional()
-  @IsNotEmpty()
   @IsPositive()
   baths?: number;
 }

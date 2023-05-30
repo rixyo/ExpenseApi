@@ -40,6 +40,7 @@
     "@nestjs/testing": "^9.0.0",
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.13",
     "@types/express": "^4.17.13",
     "@types/jest": "29.5.1",
     "@types/jsonwebtoken": "^9.0.2",
@@ -68,7 +69,10 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": "./",
+    "modulePaths": [
+      "<rootDir>"
+    ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"

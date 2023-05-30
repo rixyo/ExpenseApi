@@ -1,6 +1,5 @@
 import {
   IsString,
-  MaxLength,
   MinLength,
   IsEmail,
   Matches,
@@ -16,7 +15,6 @@ export class SignupDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(4)
-  @MaxLength(20)
   name: string;
   @IsString()
   @IsNotEmpty()
