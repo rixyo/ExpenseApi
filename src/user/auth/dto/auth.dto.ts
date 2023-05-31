@@ -7,7 +7,7 @@ import {
   IsEnum,
   IsOptional,
 } from 'class-validator';
-import {} from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import { UserRole } from '@prisma/client';
 
 export class SignupDto {
@@ -47,4 +47,20 @@ export class GenerateProductDto {
   email: string;
   @IsEnum(UserRole)
   userType: UserRole;
+}
+export class UserResponseDto {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  @Exclude()
+  password: string;
+  @Exclude()
+  created_at: Date;
+  @Exclude()
+  updated_at: Date;
+  constructor(partial: Partial<UserResponseDto>) {
+    Object.assign(this, partial);
+  }
 }

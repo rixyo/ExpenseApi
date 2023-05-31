@@ -4,6 +4,7 @@ import { v4 as uuid } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { UserRole } from '@prisma/client';
+import { UserResponseDto } from './dto/auth.dto';
 interface SignupParams {
   id: string;
   email: string;
@@ -65,6 +66,11 @@ export class AuthService {
     return bcrypt.hash(token, 10);
   }
   async getCurrentUser(id: string) {
-    return this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true, email: true, name: true, phone: true, role: true },
+    });
+    if (!user) throw new HttpException('User not found', 404);
+    return new UserResponseDto(user);
   }
 }

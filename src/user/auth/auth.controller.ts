@@ -8,7 +8,12 @@ import {
   Get,
 } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
-import { GenerateProductDto, LoginDto, SignupDto } from './dto/auth.dto';
+import {
+  GenerateProductDto,
+  LoginDto,
+  SignupDto,
+  UserResponseDto,
+} from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import * as bcrypt from 'bcrypt';
 import { User, userType } from '../decorators/user.decorator';
@@ -55,7 +60,7 @@ export class AuthController {
   }
   @Roles(UserRole.BUYER, UserRole.REALTOR, UserRole.ADMIN)
   @Get('me')
-  me(@User() user: userType) {
+  me(@User() user: userType): Promise<UserResponseDto> {
     return this.authService.getCurrentUser(user?.id);
   }
 }
