@@ -19,18 +19,25 @@ export class AuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const roles = this.reflector.get<UserRole[]>('roles', context.getHandler());
-    if (!roles) {
-      return true;
-    }
-    const request = context.switchToHttp().getRequest();
-    const token = request?.headers?.authorization?.split('Bearer ')[1];
-    if (!token) {
+    try {
+      const roles = this.reflector.get<UserRole[]>(
+        'roles',
+        context.getHandler(),
+      );
+      if (!roles) {
+        return true;
+      }
+      const request = context.switchToHttp().getRequest();
+      const token = request?.headers?.authorization?.split('Bearer ')[1];
+      if (!token) {
+        return false;
+      }
+      const user = jwt.verify(token, process.env.JWT_SECRET) as JWTPayload;
+      request.user = user;
+      return this.matchRoles(roles, user.id);
+    } catch (error) {
       return false;
     }
-    const user = jwt.verify(token, process.env.JWT_SECRET) as JWTPayload;
-    request.user = user;
-    return this.matchRoles(roles, user.id);
   }
   async matchRoles(roles: UserRole[], userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });

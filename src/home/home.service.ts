@@ -41,7 +41,14 @@ interface UpdatedHomeParams {
 @Injectable()
 export class HomeService {
   constructor(private readonly prisma: PrismaService) {}
-  async getHomes(filter: Filters): Promise<HomeResponseDto[]> {
+  async getHomes(
+    filter: Filters,
+    page: number,
+    perPage: number,
+  ): Promise<HomeResponseDto[]> {
+    const skip = (page - 1) * perPage;
+    const take = parseInt(`${perPage}`);
+
     const homes = await this.prisma.home.findMany({
       where: filter,
       select: {
@@ -63,6 +70,8 @@ export class HomeService {
           take: 1,
         },
       },
+      skip,
+      take,
       orderBy: {
         listed_date: 'desc',
       },
@@ -202,12 +211,13 @@ export class HomeService {
     });
   }
   async getMessages(realtorId: string) {
-    return this.prisma.message.findMany({
+    const messages = this.prisma.message.findMany({
       where: {
         realtorId: realtorId,
       },
       select: {
         message: true,
+        created_at: true,
         buyer: {
           select: {
             name: true,
@@ -218,6 +228,8 @@ export class HomeService {
         home: {
           select: {
             id: true,
+            price: true,
+            address: true,
           },
         },
       },
@@ -225,6 +237,10 @@ export class HomeService {
         created_at: 'desc',
       },
     });
+    if (!messages) {
+      throw NotFoundException;
+    }
+    return messages;
   }
   async searchHomes(query: string) {
     return this.prisma.home.findMany({
@@ -250,6 +266,37 @@ export class HomeService {
           },
         ],
       },
+    });
+  }
+  async getRealtorHomes(realtorId: string, page: number, perPage: number) {
+    const skip = (page - 1) * perPage;
+    const take = perPage;
+    const homes = await this.prisma.home.findMany({
+      where: {
+        realtorId: realtorId,
+      },
+      select: {
+        id: true,
+        address: true,
+        city: true,
+        images: {
+          select: {
+            url: true,
+          },
+          take: 1,
+        },
+      },
+      skip,
+      take,
+      orderBy: {
+        listed_date: 'desc',
+      },
+    });
+    if (!homes) throw NotFoundException;
+    return homes.map((home) => {
+      const fetchedHome = { ...home, image: home.images[0].url };
+      delete fetchedHome.images;
+      return new HomeResponseDto(fetchedHome);
     });
   }
 }

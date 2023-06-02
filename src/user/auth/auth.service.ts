@@ -43,7 +43,7 @@ export class AuthService {
       },
     });
 
-    return this.generateToken(user.id, user.name, user.role);
+    return this.generateToken(user.id, user.name);
   }
   async login({ email, password }: LoginParams) {
     const user = await this.prisma.user.findUnique({ where: { email } });
@@ -54,10 +54,10 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new HttpException('Invalid credentails', 400);
     }
-    return this.generateToken(user.id, user.name, user.role);
+    return this.generateToken(user.id, user.name);
   }
-  private generateToken(id: string, name: string, role: UserRole) {
-    return jwt.sign({ name, id, role }, process.env.JWT_SECRET, {
+  private generateToken(id: string, name: string) {
+    return jwt.sign({ name, id }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
   }

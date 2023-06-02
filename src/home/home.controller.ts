@@ -20,10 +20,14 @@ import {
 } from './dto/home.dto';
 import { HomeService } from './home.service';
 import { Roles } from 'src/decorators/role.decorator';
+import { AuthService } from 'src/user/auth/auth.service';
 
 @Controller('home')
 export class HomeController {
-  constructor(private readonly homeService: HomeService) {}
+  constructor(
+    private readonly homeService: HomeService,
+    private readonly authService: AuthService,
+  ) {}
   @Get()
   async getHomes(
     @Query('city') city?: string,
@@ -32,6 +36,8 @@ export class HomeController {
     @Query('beds') beds?: string,
     @Query('baths') baths?: string,
     @Query('propertyType') propertyType?: PropertyType,
+    @Query('page') page = 1,
+    @Query('perPage') perPage = 2,
   ): Promise<HomeResponseDto[]> {
     const price =
       maxPrice || minPrice
@@ -47,7 +53,7 @@ export class HomeController {
       ...(propertyType && { propertyType }),
       ...(price && { price }),
     };
-    return await this.homeService.getHomes(filters);
+    return await this.homeService.getHomes(filters, page, perPage);
   }
 
   @Get(':id')
@@ -103,12 +109,28 @@ export class HomeController {
   }
   @Roles(UserRole.REALTOR)
   @Get(':id/messages')
-  async getMessages(@Param('id', ParseUUIDPipe) id: string) {
+  async getMessages(
+    @Param('id', ParseUUIDPipe) id: string,
+    @User() user: userType,
+  ) {
+    const Paramsuser = await this.authService.getCurrentUser(id);
+    if (Paramsuser.id !== user.id) {
+      throw new UnauthorizedException();
+    }
     return await this.homeService.getMessages(id);
   }
   @Get('search/:query')
   async searchHomes(@Param('query') query: string) {
     console.log(query);
     return await this.homeService.searchHomes(query);
+  }
+  @Roles(UserRole.REALTOR)
+  @Get(':id/homes')
+  async getRealtorHomes(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('page') page = 1,
+    @Query('perPage') perPage = 2,
+  ) {
+    return await this.homeService.getRealtorHomes(id, page, perPage);
   }
 }
